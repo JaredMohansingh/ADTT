@@ -6,9 +6,9 @@ import torchvision
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.transforms import functional as F
 import albumentations as A
-import transforms, utils, engine, train
+import transforms, utils, NN.engine as engine, train
 from utils import collate_fn
-from engine import train_one_epoch, evaluate
+from NN.engine import train_one_epoch, evaluate
 
 class PredDataset(Dataset):
     def __init__(self, root, transform=None, demo=False):
