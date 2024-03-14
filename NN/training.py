@@ -2,13 +2,6 @@ import torch, os, json, cv2, numpy as np, matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 import torchvision
 from torchvision.models.detection.rpn import AnchorGenerator
-from torchvision.transforms import functional as F
-import albumentations as A
-import transforms, utils, NN.engine as engine, train
-from utils import collate_fn
-from NN.engine import train_one_epoch, evaluate
-from datasetclass import ClassDataset
-from augmentations import train_transform
 
 
 def get_model(num_keypoints, weights_path=None):

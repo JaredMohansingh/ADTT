@@ -5,10 +5,6 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision
 from torchvision.models.detection.rpn import AnchorGenerator
 from torchvision.transforms import functional as F
-import albumentations as A
-import transforms, utils, NN.engine as engine, train
-from utils import collate_fn
-from NN.engine import train_one_epoch, evaluate
 
 class PredDataset(Dataset):
     def __init__(self, root, transform=None, demo=False):
@@ -49,6 +45,7 @@ class ClassDataset(Dataset):
         self.transform = transform
         self.demo = demo  # Use demo=True if you need transformed and original images (for example, for visualization purposes)
         
+
         self.imgs_files = sorted(os.listdir(os.path.join(root, "Images")))
         self.annotations_files = sorted(os.listdir(os.path.join(root, "Annotations")))
 
@@ -65,7 +62,7 @@ class ClassDataset(Dataset):
             keypoints_original = data['keypoints']
 
             # All objects are markers   
-            bboxes_labels_original = ['Bird' for _ in bboxes_original]
+            bboxes_labels_original = ['Red Marker' for _ in bboxes_original]
 
         if self.transform:
             # Converting keypoints from [x,y,visibility]-format to [x, y]-format + Flattening nested list of keypoints

@@ -24,6 +24,8 @@ def check_for_decrease( variable_line , input, constant_line_point, delta, curre
         return True
     else:
         return False 
+
+
 ###############################################################
 def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =49, 
                       down_angle_d = -55, beam_cam_posn=[0,0,0], wall_cam_posn = [0,0,0], W_ob_px=[0,0], B_ob_px=[0,0]):
@@ -91,7 +93,7 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     beam_point_posn_vec_i = (i_beam * math.cos(down_angle_c)) - (k_beam * math.sin(down_angle_c))
     beam_point_posn_vec_j = -j_beam
     beam_point_posn_vec_k = (i_beam * math.sin(down_angle_c)) + (k_beam * math.cos(down_angle_c))  
-    # This should be defined better, using teh cartesian location of the camera and the euler rotation angles.
+    #TODO This should be defined better, using teh cartesian location of the camera and the euler rotation angles.
 
     #Beam
     line_1 = [[beam_cam[0] , beam_cam[2] , beam_cam[1]],[ beam_point_posn_vec_i  , beam_point_posn_vec_k, beam_point_posn_vec_j]]
@@ -140,14 +142,18 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
     avg_point = [1,1,1]
     avg_point[0] = ((current_line_1[0])+(current_line_2[0]))/2
-    avg_point[1] = ((current_line_1[1])+(current_line_2[1]))/2
-    avg_point[2] = ((current_line_1[2])+(current_line_2[2]))/2
+    avg_point[2] = ((current_line_1[1])+(current_line_2[1]))/2
+    avg_point[1] = ((current_line_1[2])+(current_line_2[2]))/2
+
+
+    #Not in order cause there was a mistake earleir where xyz was changed to xzy , so this line jsut changes it back to xyz
 
     print(f" Interpolation result is ->{avg_point}")
+    return avg_point
     ######    x,     z,     y
-    answer = [0.5,  0,   0.5]
-    error = find_distance(answer, avg_point)
-    print(f"Error is ->{error}")
+    #answer = [0.5,  0,   0.5]
+    #error = find_distance(answer, avg_point)
+    #print(f"Error is ->{error}")
 
 ###############################################################
 
@@ -170,5 +176,5 @@ wall_cam = [ 2.2, 0, 3.0]
 B_object = [177,449]
 W_object = [571, 790]
 
-bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
+#bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
         

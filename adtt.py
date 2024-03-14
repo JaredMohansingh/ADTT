@@ -7,6 +7,9 @@ from NN.training import get_model
 from NN.save_image import save_image
 from intersection import find_intersection
 from laser_aimer import find_az_and_theta
+import serial
+import time
+
 
 ###############################INITIALIZE##################################################################################
 
@@ -29,8 +32,7 @@ wall_cam = [ 2.2, 0, 3.0]
 
 #beam cam is facing backwards , towards negative x values 
 
-B_object = [157 , 776]
-W_object = [538 , 465]
+
 #default values
 
     ############# INTERSECTION ##############
@@ -60,10 +62,10 @@ if not capb.isOpened():
     ############# NN SETUP##############
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_model(num_keypoints = 2, weights_path = 'ADTT/NN/pth_files/low_res_birds_80.pth')
+model = get_model(num_keypoints = 2, weights_path = 'NN/pth_files/low_res_birds_80.pth')
 model.to(device)
 
-KEYPOINTS_FOLDER_TEST = 'ADTT/NN/live_recongize'
+KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
     ############# NN SETUP##############    
 
 ###############################INITIALIZE##################################################################################
@@ -81,7 +83,7 @@ while (True):
         break
     
     concat = cv2.hconcat([framew, frameb]) 
-    cv2.imwrite("ADTT/NN/live_recongize/Images/live.jpeg", concat) 
+    cv2.imwrite("NN/live_recongize/Images/live.jpg", concat) 
         #######################TAKE PCITURES#############################
     
         #################### RECONGIZING USING ML##########################
@@ -113,17 +115,29 @@ while (True):
     #save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
         #################### RECONGIZING USING ML##########################
 
+
+    print( "Birds detected in image at")
     print(keypoints_w)
-    if not(keypoints_w == []):
+    keypoints_w = [[157 , 776] , [538 , 465]]
+    #if not(keypoints_w == []) and (len(keypoints_w) ==2):
+    if (True):  
+       
         W_object = keypoints_w[0]
         B_object = keypoints_w[1]
-        
+        B_object = [157 , 776]
+        W_object = [538 , 465]
         #######################INTERSEXSHUN#####################################
+
         bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
+        print("Bird detected in 3d space at location")
+        print(bird_coord)
         #######################INTERSEXSHUN#####################################
 
         ###########################USE LASER#######################################
         az, theta = find_az_and_theta(laser_posn , bird_coord)
+        print("Turning laser to angles")
+        print(az)
+        print(theta)
         ###########################USE LASER#######################################
 
 ###############################MAIN  LOOP#######################################

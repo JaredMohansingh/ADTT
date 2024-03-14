@@ -6,7 +6,7 @@ import time
 from skimage.measure import label, regionprops, find_contours
 import  sys
 
-real = 568
+real = 0
 def mouse_point(event,x,y,flags,params):
     global take
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -19,16 +19,15 @@ for iter in range(10000):
     take = []
     bbox = []
 
-    sub_path = "ADTT/NN/making_a_dataset/add/Image"
+    sub_path = "making_a_dataset/evaluation/tobeann/Images/Image"
     image_number = str(iter)
-    image_path = sub_path+ image_number + ".jpg"
+    image_path = sub_path+ image_number + ".jpeg"
     if not os.path.isfile(image_path):
         continue
     
     image = cv2.imread(image_path)
-
-    cv2.imwrite('ADTT/NN/making_a_dataset/add/Images/Image' + str(real) + '.jpg', image)
-
+    cv2.imwrite('making_a_dataset/evaluation/evaluation/Images/Image' + str(real) + '.jpeg', image)
+    real = real +1
 
 cv2.waitKey(0)
 
@@ -37,15 +36,15 @@ for iter in range(10000):
     take = []
     bbox = []
 
-    sub_path = "ADTT/NN/making_a_dataset/add/Image"
+    sub_path = "making_a_dataset/evaluation/evaluation/Images/Image"
     image_number = str(iter)
-    image_path = sub_path+ image_number + ".jpg"
+    image_path = sub_path+ image_number + ".jpeg"
     if not os.path.isfile(image_path):
         continue
     
     image = cv2.imread(image_path)
 
-    cv2.imwrite('ADTT/NN/making_a_dataset/add/Images/Image' + str(real) + '.jpg', image)
+    #cv2.imwrite('making_a_dataset/evaluation/evaluation//Images/Image' + str(real) + '.jpg', image)
 
     cv2.imshow("Image", image)
 
@@ -73,7 +72,7 @@ for iter in range(10000):
 
    
     json_info = json.dumps(image_info)
-    json_File = open('ADTT/NN/making_a_dataset/add/Annotations/Image' + str(real) + '.json' ,'w')
+    json_File = open('making_a_dataset/evaluation/evaluation/Annotations/Image' + str(iter) + '.json' ,'w')
     json_File.write(json_info)
     json_File.close()
     real = real +1

@@ -6,7 +6,7 @@ from torchvision.transforms import functional as F
 import albumentations as A
 import transforms, utils, NN.engine as engine, train
 from utils import collate_fn
-from NN.engine import train_one_epoch, evaluate
+from engine import train_one_epoch, evaluate
 from datasetclass import ClassDataset, PredDataset
 from augmentations import train_transform
 from training import get_model
