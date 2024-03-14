@@ -35,10 +35,10 @@ if not capb.isOpened():
 ############# NN SETUP##############
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_model(num_keypoints = 2, weights_path = 'pth_files/low_res_birds_500.pth')
+model = get_model(num_keypoints = 2, weights_path = 'NN/pth_files/low_res_birds_500.pth')
 model.to(device)
 
-KEYPOINTS_FOLDER_TEST = 'newbirds/Overhead_camera'
+KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
 ############# NN SETUP##############
 
 ret, framew = capw.read()
@@ -54,7 +54,7 @@ while True:
         break
     
     concat = cv2.hconcat([framew, frameb]) 
-    cv2.imwrite("newbirds/Overhead_camera/Images/ovh.jpeg", concat) 
+    cv2.imwrite("NN/live_recongize/Images/live.jpg", concat) 
 
     #################### RECONGIZING USING ML##########################
     dataset_test = PredDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
@@ -100,7 +100,7 @@ while True:
 
     save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
     #print(keypoints_w)
-    show_live = cv2.imread('newbirds/Overhead_camera/PredictedImage1.jpg',1)
+    show_live = cv2.imread('NN/live_recongize/Images/live.jpg',1)
     cv2.imshow("image",show_live)
     if cv2.waitKey(1) == ord('0'):
         break

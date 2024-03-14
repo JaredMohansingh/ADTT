@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 
-
+#This file is used to generate the overlay for aligning the cameras to the ground markers for calibration
 
 image = cv2.imread('ADTT/overlay.jpg')
 

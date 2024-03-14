@@ -16,7 +16,7 @@ import time
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_model(num_keypoints = 2, weights_path = 'keypointsrcnn_weights_40.pth')
+model = get_model(num_keypoints = 2, weights_path = 'pth_files/low_res_birds_500.pth')
 model.to(device)
 
 

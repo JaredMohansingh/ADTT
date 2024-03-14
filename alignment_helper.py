@@ -2,6 +2,11 @@ import   cv2
 import numpy as np
 import time
 
+
+
+#This file is used to align the real world cameras with the ground markers and the overaly to ensure they are at the correct predetermined world coordinates
+
+
 ############# CAMERA SETUP##############
 capw = cv2.VideoCapture( 0 ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -23,10 +28,8 @@ if not capb.isOpened():
     print("Cannot open camera BEE")
     exit()
 
-
 ret, framew = capw.read()
 ret, frameb = capb.read()
-
 
 ############# CAMERA SETUP##############
 
