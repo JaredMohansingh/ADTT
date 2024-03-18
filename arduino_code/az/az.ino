@@ -17,7 +17,7 @@ double integral , previous , output = 0;
 double kp , ki , kd ;
 //Variables for pid control system
 
-double set_point = 66 ;
+double set_point = 0 ;
 //Variabel that controls setpoint
 
 double error , sensor_value = 0;
@@ -53,7 +53,7 @@ void setup()
   Wire.begin();
 
   as5600.begin(4);  //  set direction pin.
-  as5600.setDirection(AS5600_CLOCK_WISE);  //  default, just be explicit.
+  as5600.setDirection(AS5600_COUNTERCLOCK_WISE);  //  
 
   //Serial.println(as5600.getAddress());
 
@@ -87,12 +87,12 @@ void loop()
   servo_input = rectify_for_servo(output);
   //Controller output needs to be modified to be suited to servo input
 
-  Serial.println("---------------------------------");
-  Serial.println("Sensor reading is");
-  Serial.println(sensor_value);
-  Serial.println("");
-  Serial.println("Set point value is");
-  Serial.println(set_point);
+  //Serial.println("---------------------------------");
+  //Serial.println("Sensor reading is");
+  //Serial.println(sensor_value);
+  //Serial.println("");
+  //Serial.println("Set point value is");
+  //Serial.println(set_point);
   //Serial.println("");
   //Serial.println("Error value is");
   //Serial.println(error);
@@ -114,11 +114,11 @@ void loop()
     //Serial.println(data);
 
     set_point = data.toInt();
-      if (set_point > 360)
+      if (set_point > 720)
       {
         set_point = 180;
       }
-      if (set_point < 0)
+      if (set_point < -360)
       {
         set_point = 180;
       }

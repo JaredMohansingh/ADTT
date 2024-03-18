@@ -37,9 +37,9 @@ def find_az_and_theta(laser_posn , target_posn):
     print(theta)
     return az,theta
 
-#laser_acc = [ 0,0,3 ]
-#target_acc = [ -3,-3,3 ]
+laser_acc = [ 0,0,3 ]
+target_acc = [ -0,-3,6 ]
 
-#find_az_and_theta(laser_acc , target_acc)
+find_az_and_theta(laser_acc , target_acc)
 
 #print(  math.degrees(math.atan( -2 )  ))

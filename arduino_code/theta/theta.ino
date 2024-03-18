@@ -3,7 +3,7 @@
 #include <Servo.h>
 #include "Arduino.h"
 
-#define LASER_PIN 1
+#define LASER_PIN 2
 
 //Source for control system code : https://www.youtube.com/watch?v=RZW1PsfgVEI&t=317s
 //Code for as5600 library : https://github.com/RobTillaart/AS5600
@@ -19,7 +19,7 @@ double integral , previous , output = 0;
 double kp , ki , kd ;
 //Variables for pid control system
 
-double set_point = 66 ;
+double set_point = 90 ;
 //Variabel that controls setpoint
 
 double error , sensor_value = 0;
@@ -46,7 +46,7 @@ void setup()
   kd = 0.05;
   //Control system parameters initilazied
 
-  twpro.attach(0);  // attaches the servo on pin 0 to the servo object
+  twpro.attach(1);  // attaches the servo on pin 0 to the servo object
   pinMode(LASER_PIN, OUTPUT);
   //LED pin
 
@@ -58,7 +58,9 @@ void setup()
   Wire.begin();
 
   as5600.begin(4);  //  set direction pin.
-  as5600.setDirection(AS5600_CLOCK_WISE);  //  default, just be explicit.
+  as5600.setDirection(AS5600_CLOCK_WISE);  
+  // 
+
 
   //Serial.println(as5600.getAddress());
 
@@ -93,12 +95,12 @@ void loop()
   servo_input = rectify_for_servo(output);
   //Controller output needs to be modified to be suited to servo input
 
-  Serial.println("---------------------------------");
-  Serial.println("Sensor reading is");
-  Serial.println(sensor_value);
-  Serial.println("");
-  Serial.println("Set point value is");
-  Serial.println(set_point);
+  //Serial.println("---------------------------------");
+  //Serial.println("Sensor reading is");
+  //Serial.println(sensor_value);
+  //Serial.println("");
+  //Serial.println("Set point value is");
+  //Serial.println(set_point);
   //Serial.println("");
   //Serial.println("Error value is");
   //Serial.println(error);
@@ -111,31 +113,35 @@ void loop()
   //Serial.println("");
 
   twpro.write(servo_input); 
+  //Serial.println(set_point);
 
   if (Serial.available() > 0) { // Check if data is available to read
     data = Serial.readStringUntil('\r'); // Read the incoming data
 
     // Process the data
     //Serial.print("Received data: ");
-    //Serial.println(data);
-    if (data == "on")
+    Serial.println(data);
+    if (data == "l")
     {
+      //Serial.println("Turn ONNNN");
       turn_on();
     }
-    else if (data == "off")
+    else if (data == "n")
     {
-      turn_on();
+      //Serial.println("Turn OFFFFFFFFFFF");
+      turn_off();
     }
     else
     {
       set_point = data.toInt();
-      if (set_point > 180)
+      
+      if (set_point > 360)
       {
-        set_point = 135;
+        set_point = 45;
       }
-      if (set_point < 90)
+      if (set_point < -360)
       {
-        set_point = 135;
+        set_point = 45;
       }
     }
   }
