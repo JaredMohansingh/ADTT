@@ -19,8 +19,15 @@ double integral , previous , output = 0;
 double kp , ki , kd ;
 //Variables for pid control system
 
-double set_point = 90 ;
+double set_point = 0 ;
 //Variabel that controls setpoint
+
+int servo_input = 0;
+double rectified_sensor_value =0;
+//The output variable from the controller that is used to adjust the system and satisfy the reading from the sensor
+
+float bias = 0;
+//Since the sensor doesnt reset to zero properly, this bias is needed to adjust the bad zero position 
 
 double error , sensor_value = 0;
 int servo_max_cw = 0;
@@ -30,12 +37,9 @@ int servo_zp = 90;
 
 int servo_cw_dp =  87;
 int servo_ccw_dp = 98 ;
-
-int servo_input = 0;
 // The value at which the servo doesnt move, so 87 and 98 , the servo moves
 //
-// I----------------CW-------------I----DZ---I------DZ-------I------------CCW-------------I
-// 0-----------------------------87,88-------90------------97,98-------------------------180
+// 0                             87,88       90            97,98                         180
 // I----------------CW-------------I----DZ---I------DZ-------I------------CCW-------------I
 // 
 
@@ -61,7 +65,6 @@ void setup()
   as5600.setDirection(AS5600_CLOCK_WISE);  
   // 
 
-
   //Serial.println(as5600.getAddress());
 
   //  as5600.setAddress(0x40);  //  AS5600L only
@@ -81,10 +84,13 @@ void loop()
   //Time for control system
 
   //sensor_value = (as5600.rawAngle() * AS5600_RAW_TO_DEGREES);
-  sensor_value = (as5600.getCumulativePosition() * AS5600_RAW_TO_DEGREES);
-  //We use cumulative position to prevent overlooping from 360 to 0 and causing infinite loop
+  sensor_value = (as5600.getCumulativePosition() * AS5600_RAW_TO_DEGREES) ;
+  rectified_sensor_value = sensor_value -bias ;
+  //We use cumulative position to prevent overlooping from 360 to 0 and causing infinite loop 
+  // and then add bias to correct if calibrated properly
 
-  error = set_point - sensor_value ;
+
+  error = set_point - rectified_sensor_value ;
   //Feedback
   
   output = pid(-error);
@@ -95,10 +101,10 @@ void loop()
   servo_input = rectify_for_servo(output);
   //Controller output needs to be modified to be suited to servo input
 
-  //Serial.println("---------------------------------");
-  //Serial.println("Sensor reading is");
-  //Serial.println(sensor_value);
-  //Serial.println("");
+  Serial.println("---------------------------------");
+  Serial.println("Sensor reading is");
+  Serial.println(sensor_value);
+  Serial.println("");
   //Serial.println("Set point value is");
   //Serial.println(set_point);
   //Serial.println("");
@@ -121,6 +127,16 @@ void loop()
     // Process the data
     //Serial.print("Received data: ");
     Serial.println(data);
+
+    if (data == "r")
+    {
+      Serial.println("This position is now ZERO degrees");
+
+      //as5600.resetCumulativePosition(0);
+      //For some reason this function doesnt actually reset to zero, but instead to -18.4.
+      bias = sensor_value  ;
+    }
+
     if (data == "l")
     {
       //Serial.println("Turn ONNNN");
@@ -137,11 +153,11 @@ void loop()
       
       if (set_point > 360)
       {
-        set_point = 45;
+        set_point = 330;
       }
-      if (set_point < -360)
+      if (set_point < -45)
       {
-        set_point = 45;
+        set_point = 0;
       }
     }
   }
