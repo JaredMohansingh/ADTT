@@ -148,7 +148,7 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
     #Not in order cause there was a mistake earleir where xyz was changed to xzy , so this line jsut changes it back to xyz
 
-    print(f" Interpolation result is ->{avg_point}")
+    #print(f" Interpolation result is ->{avg_point}")
     return avg_point
     ######    x,     z,     y
     #answer = [0.5,  0,   0.5]

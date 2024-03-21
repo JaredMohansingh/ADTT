@@ -3,12 +3,17 @@
 #include <Servo.h>
 #include "Arduino.h"
 
+#define LASER_PIN 1
+
 //Source for control system code : https://www.youtube.com/watch?v=RZW1PsfgVEI&t=317s
 //Code for as5600 library : https://github.com/RobTillaart/AS5600
 
 AS5600 as5600;   //  use default Wire
+//sensor used in project
+
 Servo twpro; 
 //Servo motor
+
 String data;
 //Data from python script that controls setpoint for control system
 
@@ -27,7 +32,7 @@ float bias = 0;
 //Since the sensor doesnt reset to zero properly, this bias is needed to adjust the bad zero position 
 
 double error , sensor_value = 0;
-double rectified_sensor_value =0;
+double calibrated_sensor_value =0;
 int servo_max_cw = 0;
 int servo_max_ccw = 180;
 int servo_zp = 90;
@@ -41,9 +46,24 @@ int servo_ccw_dp = 98 ;
 // I----------------CW-------------I----DZ---I------DZ-------I------------CCW-------------I
 // 
 
+int az = 0;
+int theta = 0 ;
+const int trigger_pin = 6;
+int trigger_state ;
+
+
+
 void setup()
 {
-  
+
+  //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
+  pinMode(trigger_pin, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT); 
+  //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
+
+  pinMode(LASER_PIN, OUTPUT);
+
+
   kp = 0.8;
   ki = 0.05;
   kd = 0.05;
@@ -73,6 +93,25 @@ void setup()
 
 void loop()
 {
+  //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
+  trigger_state = digitalRead(trigger_pin);
+  if (trigger_state == HIGH) 
+  {
+    az = 1;
+    theta = 0;
+    digitalWrite(LED_BUILTIN, HIGH);
+    //Serial.println("AZ");
+  }
+  else 
+  {
+    az = 0;
+    theta = 1;
+    digitalWrite(LED_BUILTIN, LOW);
+    //Serial.println("THETA");
+  }
+  //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
+
+  
   double now = millis();
   dt = (now - lasttime )/ 1000.0;
   lasttime = now ;
@@ -80,24 +119,27 @@ void loop()
 
   //sensor_value = (as5600.rawAngle() * AS5600_RAW_TO_DEGREES);
   sensor_value = (as5600.getCumulativePosition() * AS5600_RAW_TO_DEGREES) ;
-  rectified_sensor_value = sensor_value -bias ;
+  calibrated_sensor_value = sensor_value -bias ;
   //We use cumulative position to prevent overlooping from 360 to 0 and causing infinite loop 
   // and then add bias to correct if calibrated properly
 
-  error = set_point - rectified_sensor_value ;
+  error = set_point - calibrated_sensor_value ;
   //Feedback 
   
-  output = pid(error);
+  output = pid(-error);
   //Output for controller
   //If the servo turns the wrong way, its cause the line above needs to be output = pid(-error);
   
   servo_input = rectify_for_servo(output);
   //Controller output needs to be modified to be suited to servo input
 
-  //Serial.println("---------------------------------");
+  Serial.println("---------------------------------");
   //Serial.println("Sensor reading is");
-  Serial.println(sensor_value);
-  Serial.println("");
+  //Serial.println(sensor_value);
+  //Serial.println("");
+  Serial.println("Calibrated Sensor reading is");
+  Serial.println(calibrated_sensor_value);
+  //Serial.println("");
   //Serial.println("Set point value is");
   //Serial.println(set_point);
   //Serial.println("");
@@ -112,35 +154,58 @@ void loop()
   //Serial.println("");
 
   twpro.write(servo_input); 
-
-  if (Serial.available() > 0) { // Check if data is available to read
+  
+  if (Serial.available() > 0) 
+  { // Check if data is available to read
     data = Serial.readStringUntil('\r'); // Read the incoming data
 
     // Process the data
     //Serial.print("Received data: ");
     //Serial.println(data);
 
-    if (data == "r")
+    if (data.startsWith("l"))
     {
-      Serial.println("This position is now ZERO degrees");
-
-      //as5600.resetCumulativePosition(0);
-      //For some reason this function doesnt actually reset to zero, but instead to -18.4.
-      bias = sensor_value   ;
+      turn_on();
+    }
+    if (data.startsWith("n"))
+    {
+      turn_off();
     }
 
-
-    set_point = data.toInt();
-    if (set_point > 360)
+    if ((az and data.startsWith("a") )  or  (theta and data.startsWith("t")))
     {
-      set_point = 330;
-    }
-    if (set_point < -45)
-    {
-      set_point = 0;
+      //Serial.println("AN AZIMUTH COMMAND WAS GIVEN");
+      data.remove(0,1);
+      //Serial.println(data);
+      
+      if ( data.startsWith("u") )
+      {
+        set_point = set_point + 45;
+      }
+      if ( data.startsWith("d") )
+      {
+        set_point = set_point - 45;
+      }
+      if ( data.startsWith("r") )
+      {
+        Serial.println("This position is now ZERO degrees");
+        //as5600.resetCumulativePosition(0); <-For some reason this function doesnt actually reset to zero, but instead to -18.4.
+        bias = sensor_value   ;
+        set_point = 0 ;
+      }
+      if (data.startsWith("z"))
+      {
+        set_point = 0;
+      }
+      
+      if (data.toFloat() != 0)
+      {
+        set_point = data.toFloat() ;
+      }
     }
   }
 }
+
   
 double rectify_for_servo(double controller_output)
 {
@@ -148,7 +213,7 @@ double rectify_for_servo(double controller_output)
   //Actually scaling the value from <-360 to 360> to <0 to 180>
   //See christmas tree diagram
 
-  if ( abs(controller_output- servo_zp ) < 0.3  )
+  if ( abs(controller_output- servo_zp ) < 0.25  )
   {
     return 90 ;
   }
@@ -181,6 +246,18 @@ double pid(double error)
   
   return output ;
 
+}
+
+void turn_on()
+{
+  digitalWrite(LASER_PIN, HIGH);
+  //turns on the laser
+}
+
+void turn_off()
+{
+  digitalWrite(LASER_PIN, LOW);
+  //turns off the laser
 }
 
 
