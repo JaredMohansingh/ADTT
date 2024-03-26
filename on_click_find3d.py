@@ -1,10 +1,5 @@
-import json, os
-import numpy as np
-import matplotlib.pyplot as plt
+
 import cv2
-import time
-from skimage.measure import label, regionprops, find_contours
-import  sys
 from intersection import find_intersection
 
 
@@ -64,24 +59,17 @@ while True:
     
     if cv2.waitKey(1) == ord('0'):
         
-        
-        
         new_take = take[0][0]-720
 
         W_object =[ new_take,take[0][1] ]
-       
-        print(W_object)
-
         B_object = take[1]
         
         break
 
 # When everything done, release the capture
-
 capw.release()
 capb.release()
 cv2.destroyAllWindows()
-
 
 d__angle_of_view = 55.0 
 h_angle_of_view = 25.73 
@@ -95,5 +83,6 @@ beam_cam = [-2.2 ,0 ,3.0]
 # wall cam is facing forward , toward positive x values 
 wall_cam = [ 2.2, 0, 3.0]
 #beam cam is facing backwards , towards negative x values 
-
-find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
+print(W_object)
+print(B_object)
+print(find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) ) 

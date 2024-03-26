@@ -92,7 +92,7 @@ void setup()
 }
 
 void loop()
-{
+{               
   //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
   trigger_state = digitalRead(trigger_pin);
   if (trigger_state == HIGH) 
@@ -133,12 +133,12 @@ void loop()
   servo_input = rectify_for_servo(output);
   //Controller output needs to be modified to be suited to servo input
 
-  Serial.println("---------------------------------");
+  //Serial.println("---------------------------------");
   //Serial.println("Sensor reading is");
   //Serial.println(sensor_value);
   //Serial.println("");
-  Serial.println("Calibrated Sensor reading is");
-  Serial.println(calibrated_sensor_value);
+  //Serial.println("Calibrated Sensor reading is");
+  //Serial.println(calibrated_sensor_value);
   //Serial.println("");
   //Serial.println("Set point value is");
   //Serial.println(set_point);
@@ -174,7 +174,7 @@ void loop()
 
     if ((az and data.startsWith("a") )  or  (theta and data.startsWith("t")))
     {
-      //Serial.println("AN AZIMUTH COMMAND WAS GIVEN");
+      
       data.remove(0,1);
       //Serial.println(data);
       
@@ -213,7 +213,7 @@ double rectify_for_servo(double controller_output)
   //Actually scaling the value from <-360 to 360> to <0 to 180>
   //See christmas tree diagram
 
-  if ( abs(controller_output- servo_zp ) < 0.25  )
+  if ( abs(controller_output- servo_zp ) < 0.3  )
   {
     return 90 ;
   }
@@ -245,7 +245,6 @@ double pid(double error)
   //double output = (kp * proportional)+( ki * integral)+( kd * derivative);
   
   return output ;
-
 }
 
 void turn_on()

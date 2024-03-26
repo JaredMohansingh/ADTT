@@ -71,6 +71,7 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
     wall_point_posn_vec_i = -wall_point_posn_vec_i
     # ^^ Negate i since it is facing the wrong x direction
+    #TODO This should be defined better, using the cartesian location of the camera and the euler rotation angles.
 
     ########################################################################################
     #generate camera point vector from beam
@@ -93,7 +94,9 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     beam_point_posn_vec_i = (i_beam * math.cos(down_angle_c)) - (k_beam * math.sin(down_angle_c))
     beam_point_posn_vec_j = -j_beam
     beam_point_posn_vec_k = (i_beam * math.sin(down_angle_c)) + (k_beam * math.cos(down_angle_c))  
-    #TODO This should be defined better, using teh cartesian location of the camera and the euler rotation angles.
+    #TODO This should be defined better, using the cartesian location of the camera and the euler rotation angles.
+
+    ########################################################################################
 
     #Beam
     line_1 = [[beam_cam[0] , beam_cam[2] , beam_cam[1]],[ beam_point_posn_vec_i  , beam_point_posn_vec_k, beam_point_posn_vec_j]]
@@ -172,9 +175,9 @@ wall_cam = [ 2.2, 0, 3.0]
 # TODO - update this to include euler angles of camera . 
 
 
-## This is literally jsut to test it
-B_object = [177,449]
-W_object = [571, 790]
 
-#bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
-        
+#answer = [-0.575, -0.513, 0.935 ]
+#bird_coord = [-0.5,-0.5,0.93]
+#error = find_distance(answer, bird_coord)
+#print(f"Error is ->{error}")
+
