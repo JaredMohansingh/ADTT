@@ -161,7 +161,7 @@ void loop()
 
     // Process the data
     //Serial.print("Received data: ");
-    //Serial.println(data);
+    Serial.println(data);
 
     if (data.startsWith("l"))
     {
@@ -193,14 +193,29 @@ void loop()
         bias = sensor_value   ;
         set_point = 0 ;
       }
+
+
       if (data.startsWith("z"))
       {
         set_point = 0;
       }
-      
+      //This is needed since  teh if statements belkow prevents zero from being the setpoint
+
       if (data.toFloat() != 0)
       {
         set_point = data.toFloat() ;
+      }
+
+      if(data.startsWith("n"))
+      {
+        data.remove(0,1);
+        if (data.toFloat() != 0)
+        {
+          
+          bias = bias + ( set_point - data.toFloat()) ;
+
+          set_point = data.toFloat() ;
+        }
       }
     }
   }

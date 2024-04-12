@@ -39,6 +39,9 @@ def find_az_and_theta(laser_posn , target_posn):
 
     #print(az)
     #print(theta)
+    az = az - 180
+    ## this is to account for how teh laser gimbal is mounted
+    ##TODO incorporate the mounting of the laser gimbal as a parameter of the laser aimer function
     return az,theta
 
 #laser_acc = [ 0,0,0 ]

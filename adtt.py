@@ -15,75 +15,21 @@ import time
 
     #vvvvvvvvvvvv# CALIBRATE LASER #vvvvvvvvvvvvv#   
 
-arduino_a = serial.Serial('/dev/ttyACM0', 9600) 
-arduino_t = serial.Serial('/dev/ttyACM1', 9600) 
-val_a = 0
-val_t = 0
-laser_on = "l"
-laser_off = "n"
-reset_sensor = "r"
+#arduino_a = serial.Serial('/dev/ttyACM0', 9600) 
+#arduino_t = serial.Serial('/dev/ttyACM1', 9600) 
 jnt = "000"
-
 time.sleep(2) # Give some time for the serial connection to establish
 
-while(True):
+while not(True):
     
     jnt  = input("Enter a for azimuth, enter t for theta, then u for up or d down , or just the angle / servo speed")
 
-    if( jnt[0] == "X"):
+    if (jnt == "x"):
         break
 
-    if( jnt[0] == "a"):
-
-        if ( jnt[1]== "r" ):
-            arduino_a.write(reset_sensor.encode())
-            val_a = 0 
-
-        if (jnt[1] == "u"):
-            val_a = val_a +45
-            arduino_a.write(str(val_a ).encode()) 
-        
-        if (jnt[1] == "d"):
-            val_a = val_a -45
-            arduino_a.write(str(val_a ).encode()) 
-        
-        if (jnt[1:].isdigit()):
-            val_a = float(jnt[1:])
-            arduino_a.write(str(val_a ).encode()) 
-        
-    ################################################
-
-    if( jnt[0] == "l"):
-        arduino_t.write(laser_on.encode()) 
-    if( jnt[0] == "n"):
-        arduino_t.write(laser_off.encode()) 
-
-    if( jnt[0] == "t"):
-
-        if ( jnt[1]== "r" ):
-          arduino_t.write(reset_sensor.encode())
-          val_t = 0 
-
-        if (jnt[1] == "u"):
-          val_t = val_t +45
-          arduino_t.write(str(val_t ).encode()) 
-      
-        if (jnt[1] == "d"):
-          val_t = val_t -45
-          arduino_t.write(str(val_t ).encode()) 
-      
-        if (jnt[1:].isdigit()):
-          val_t = float(jnt[1:])
-          arduino_t.write(str(val_t ).encode()) 
-      
-    print("Val a is  ")
-    print(val_a)
-    print(" ")
-    print("Val t is ")
-    print(val_t)
-    print(" ")
-    #^^^^^^^^^^^^# CALIBRATE LASER #^^^^^^^^^^^^#
-
+    arduino_a.write(jnt.encode()) 
+    arduino_t.write(jnt.encode()) 
+    #vvvvvvvvvvvv# CALIBRATE LASER #vvvvvvvvvvvvv# 
 
     #vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#   
 
@@ -140,6 +86,7 @@ KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
 #-----------------------------#INITIALISE#----------------------------------------------------------------------------------------------#
 
 #-----------------------------#MAIN  LOOP#----------------------------------------------------------------------------------------------#
+counter = 0
 while (True):
 
         #vvvvvvvvvvvv# TAKE PICTURES #vvvvvvvvvvvvv#
@@ -181,19 +128,19 @@ while (True):
     for bbox in output[0]['boxes'][high_scores_idxs_w][post_nms_idxs_w].detach().cpu().numpy():
         bboxes_w.append(list(map(int, bbox.tolist())))
 
-    #save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
         
-    print( "Birds detected in image at")
-    
-    keypoints_w = [[157 , 776] , [538 , 465]]
-    print(keypoints_w)
 
+    if not(keypoints_w == []):
+        print( "Birds detected in image at")
+        print(keypoints_w)
+        save_image(KEYPOINTS_FOLDER_TEST,counter,image_w, bboxes_w, keypoints_w )
+        counter= counter +1
         #^^^^^^^^^^^^# RECONGIZING USING ML #^^^^^^^^^^^^#
 
         #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
-
+    ##keypoints_w = [[157 , 776] , [538 , 465]]
     #if not(keypoints_w == []) and (len(keypoints_w) ==2):
-    if (True):  
+    if (not True):  
        
         W_object = keypoints_w[0]
         B_object = keypoints_w[1]
@@ -208,12 +155,22 @@ while (True):
         print(bird_coord)
         #^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
 
-        #vvvvvvvvvvvv# USE LASER #vvvvvvvvvvvvv#
+        
+        #vvvvvvvvvvvv# CALCULATE LASER ANGLES #vvvvvvvvvvvvv#
         az, theta = find_az_and_theta(laser_posn , bird_coord)
         print("Turning laser to angles")
         print(az)
         print(theta)
-        print("_________________________________________________")
+        #^^^^^^^^^^^^# CALCULATE LASER ANGLES #^^^^^^^^^^^^#
+
+        #vvvvvvvvvvvv# USE LASER #vvvvvvvvvvvvv#
+        command = "a"+str(az)
+        arduino_a.write(  command.encode()) 
+        arduino_t.write(  command.encode())
+
+        command = "t"+str(theta)
+        arduino_a.write(  command.encode()) 
+        arduino_t.write(  command.encode()) 
         #^^^^^^^^^^^^# USE LASER #^^^^^^^^^^^^#
 
         #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#

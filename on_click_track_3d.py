@@ -1,26 +1,45 @@
 
 import cv2
 from intersection import find_intersection
-
-
-take = []
-W_object = []
-B_object = []
+import serial
+import time
+from laser_aimer import find_az_and_theta
 
 def mouse_point(event,x,y,flags,params):
     global take
     if event == cv2.EVENT_LBUTTONDOWN:
         take.append((x,y))
     
-###################
-        
+
+arduino_a = serial.Serial('/dev/ttyACM1', 9600) 
+arduino_t = serial.Serial('/dev/ttyACM0', 9600) 
+jnt = "000"
+
+laser_posn =  [ 2, -1.9, 2.3 ]
+
+take = []
+W_object = []
+B_object = []
+
+##################################
+
+while(True):
+    
+  jnt  = input("Enter a for azimuth, enter t for theta, then u for up or d down , or just the angle / servo speed")
+  if (jnt == "x"):
+    break
+  arduino_a.write(jnt.encode()) 
+  arduino_t.write(jnt.encode()) 
+
+################################# 
+
 ############# CAMERA SETUP##############
-capw = cv2.VideoCapture( 2 ) 
+capw = cv2.VideoCapture( 0 ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capw.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capw.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
-capb = cv2.VideoCapture( 0 )  
+capb = cv2.VideoCapture( 2 )  
 capb.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capb.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capb.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -35,10 +54,8 @@ if not capb.isOpened():
     print("Cannot open camera BEE")
     exit()
 
-ret, framew = capw.read()
-ret, frameb = capb.read()
-
 ############# CAMERA SETUP##############
+
 
 while True:
 
@@ -53,7 +70,6 @@ while True:
     
     r_image = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
     
-
     cv2.imshow("Wall Image", r_image)
     cv2.setMouseCallback("Wall Image",mouse_point)
     
@@ -87,4 +103,16 @@ wall_cam = [ 2.2, 0, 3.0]
 #beam cam is facing backwards , towards negative x values 
 print(W_object)
 print(B_object)
-print(find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) ) 
+target_posn = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
+
+az,theta = find_az_and_theta(laser_posn, target_posn)
+#print(az)
+#print(theta)
+command = "t" + str(theta) + "\r"
+print(command)
+arduino_a.write(command.encode()) 
+arduino_t.write(command.encode())
+command = "a" + str(az) + "\r"
+print(command)
+arduino_a.write(command.encode()) 
+arduino_t.write(command.encode())

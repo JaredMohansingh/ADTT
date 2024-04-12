@@ -6,6 +6,7 @@ from utils import collate_fn
 from datasetclass import  PredDataset
 from training import get_model
 from save_image import save_image
+from visualize import visualize
 
 ############# NN SETUP##############
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -17,7 +18,7 @@ KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
 ############# NN SETUP##############
 
 
-############# CAMERA SETUP##############\
+############# CAMERA SETUP##############
 
 count = 0 
 capw = cv2.VideoCapture( 0 ) 
@@ -45,28 +46,26 @@ if not capb.isOpened():
 
 
 
-#ret, framew = capw.read()
-#ret, frameb = capb.read()
+ret, framew = capw.read()
+ret, frameb = capb.read()
 
 while True:
 
-    ret, framew = capw.read()
-    ret, frameb = capb.read()
-
-    while (not ret):
-        ret, framew = capw.read()
-        ret, frameb = capb.read()
-        count = count +1
-        print(count)
+    retw, framew = capw.read()
+    retb, frameb = capb.read()
 
 
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
+    if not retw:
+        print("WWWWWWWWWWWWWWWW  Can't receive frame (stream end?). Exiting ...")
         break
     
+
+    if not retb:
+        print("BBBBBBBBBBBBBBBB  Can't receive frame (stream end?). Exiting ...")
+        break
     
 
-    concat = cv2.vconcat([framew, frameb]) 
+    concat = cv2.vconcat([frameb, framew]) 
     concat = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
     cv2.imwrite("NN/live_recongize/Images/live.jpg", concat) 
 
@@ -107,15 +106,23 @@ while True:
 
 
     #Uncomment the previous line to show the predicted coordinates in console
-    #visualize(1,image, bboxes, keypoints )
+    #visualize(1,concat, bboxes_w, keypoints_w )
 
     #Note that the function below is for when ONE iMage is in thE prediction foilder
     # and the param 'count' is used to label files , nothing more
 
-    save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
+    #save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
+
     #print(keypoints_w)
     show_live = cv2.imread('NN/live_recongize/Images/live.jpg',1)
-    cv2.imshow("image",show_live)
+
+    if not(keypoints_w == []):
+        print( "Birds detected in image at")
+        print(keypoints_w)
+        save_image(KEYPOINTS_FOLDER_TEST,count,image_w, bboxes_w, keypoints_w )
+        count= count +1
+
+    cv2.imshow("image",concat)
     if cv2.waitKey(1) == ord('0'):
         break
 # When everything done, release the capture

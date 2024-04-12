@@ -8,12 +8,12 @@ import time
 
 
 ############# CAMERA SETUP##############
-capw = cv2.VideoCapture( 0 ) 
+capw = cv2.VideoCapture( 2 ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capw.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capw.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
-capb = cv2.VideoCapture( 2 )  
+capb = cv2.VideoCapture( 0 )  
 capb.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capb.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capb.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -23,6 +23,8 @@ if not capw.isOpened():
     print("Cannot open camera double U")
     exit()
 
+ret, framew = capw.read()
+
 if not capb.isOpened():
 
     print("Cannot open camera BEE")
@@ -31,13 +33,15 @@ if not capb.isOpened():
 ret, framew = capw.read()
 ret, frameb = capb.read()
 
+
+
 ############# CAMERA SETUP##############
 
 while True:
 
     ret, framew = capw.read()
     ret, frameb = capb.read()
-
+    
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
