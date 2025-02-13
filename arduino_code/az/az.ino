@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 #define LASER_PIN 1
-
+#define TRIGGER_PIN 6
 //Source for control system code : https://www.youtube.com/watch?v=RZW1PsfgVEI&t=317s
 //Code for as5600 library : https://github.com/RobTillaart/AS5600
 
@@ -48,7 +48,7 @@ int servo_ccw_dp = 98 ;
 
 int az = 0;
 int theta = 0 ;
-const int trigger_pin = 6;
+
 int trigger_state ;
 
 
@@ -57,7 +57,7 @@ void setup()
 {
 
   //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
-  pinMode(trigger_pin, INPUT);
+  pinMode( TRIGGER_PIN , INPUT);
   pinMode(LED_BUILTIN, OUTPUT); 
   //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
 
@@ -94,7 +94,7 @@ void setup()
 void loop()
 {               
   //////////////////////////// OVER HERE CONTROLS IF THE ARDUINO IS FOR AZ OR THETA////////////////////////////////////
-  trigger_state = digitalRead(trigger_pin);
+  trigger_state = digitalRead( TRIGGER_PIN );
   if (trigger_state == HIGH) 
   {
     az = 1;
@@ -138,7 +138,7 @@ void loop()
   //Serial.println(sensor_value);
   //Serial.println("");
   //Serial.println("Calibrated Sensor reading is");
-  //Serial.println(calibrated_sensor_value);
+  Serial.println(calibrated_sensor_value);
   //Serial.println("");
   //Serial.println("Set point value is");
   //Serial.println(set_point);

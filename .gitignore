@@ -1,6 +1,14 @@
 # ignore ALL .log files
 *.log
 
-# ignore ALL files in ANY directory named temp
+# ignore ALL .pth files
+*.pth
+
+# ignore ALL .jpg aand .json files
+*.jpg
+*.jpeg
+*.json
+
+# ignore ALL files in ANY directory with images realting to training
 pth_files/
 making_a_dataset/

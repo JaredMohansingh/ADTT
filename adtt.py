@@ -13,7 +13,16 @@ import time
 
 #-----------------------------#INITIALISE#----------------------------------------------------------------------------------------------#
 
-    #vvvvvvvvvvvv# CALIBRATE LASER #vvvvvvvvvvvvv#   
+#vvvvvvvvvvvv# NN SETUP #vvvvvvvvvvvvv#
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+model = get_model(num_keypoints = 2, weights_path = 'ADTT/PTHFILES/keypointsrcnn_weights_35.pth')
+model.to(device)
+
+KEYPOINTS_FOLDER_TEST = 'ADTT/NN/TEST_MULTI'
+    #^^^^^^^^^^^^# NN SETUP#^^^^^^^^^^^^#   
+
+#vvvvvvvvvvvv# CALIBRATE LASER #vvvvvvvvvvvvv#   
 
 #arduino_a = serial.Serial('/dev/ttyACM0', 9600) 
 #arduino_t = serial.Serial('/dev/ttyACM1', 9600) 
@@ -29,9 +38,9 @@ while not(True):
 
     arduino_a.write(jnt.encode()) 
     arduino_t.write(jnt.encode()) 
-    #vvvvvvvvvvvv# CALIBRATE LASER #vvvvvvvvvvvvv# 
+#^^^^^^^^^^^^^# CALIBRATE LASER #^^^^^^^^^^^^^^# 
 
-    #vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#   
+#vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#   
 
 laser_posn = [0,0,3]
 
@@ -43,22 +52,21 @@ down_angle = -55.0
 image_width_px = 720 
 image_height_px = 1280 
 
-beam_cam = [-2.2 ,0 ,3.0]
+beam_cam = [ 4.4 ,0 ,3.0, 0, -55.0 , 180 ]
 # wall cam is facing forward , toward positive x values 
-
-wall_cam = [ 2.2, 0, 3.0]
+wall_cam = [ 0, 0, 3.0 , 0 ,-55.0, 0 ]
 #beam cam is facing backwards , towards negative x values 
-#default values
 
-    #^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
+#default value
+#^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
 
-    #vvvvvvvvvvvv# CAMERA SETUP #vvvvvvvvvvvvv#
-capw = cv2.VideoCapture( 0 ) 
+#vvvvvvvvvvvv# CAMERA SETUP #vvvvvvvvvvvvv#
+capw = cv2.VideoCapture(  0  +cv2.CAP_DSHOW ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capw.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capw.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
-capb = cv2.VideoCapture( 2 )  
+capb = cv2.VideoCapture( 1  +cv2.CAP_DSHOW )  
 capb.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capb.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capb.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -72,24 +80,16 @@ if not capb.isOpened():
 
     print("Cannot open camera BEE")
     exit()
-    #^^^^^^^^^^^^# CAMERA SETUP #^^^^^^^^^^^^#  
-
-    #vvvvvvvvvvvv# NN SETUP #vvvvvvvvvvvvv#
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-model = get_model(num_keypoints = 2, weights_path = 'NN/pth_files/low_res_birds_80.pth')
-model.to(device)
-
-KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
-    #^^^^^^^^^^^^# NN SETUP#^^^^^^^^^^^^#    
+ #^^^^^^^^^^^^# CAMERA SETUP #^^^^^^^^^^^^#  
 
 #-----------------------------#INITIALISE#----------------------------------------------------------------------------------------------#
 
 #-----------------------------#MAIN  LOOP#----------------------------------------------------------------------------------------------#
+
 counter = 0
 while (True):
 
-        #vvvvvvvvvvvv# TAKE PICTURES #vvvvvvvvvvvvv#
+    #vvvvvvvvvvvv# TAKE PICTURES #vvvvvvvvvvvvv#
 
     ret, framew = capw.read()
     ret, frameb = capb.read()
@@ -98,11 +98,14 @@ while (True):
         print("Can't receive frame (stream end?). Exiting ...")
         break
     
-    concat = cv2.hconcat([framew, frameb]) 
-    cv2.imwrite("NN/live_recongize/Images/live.jpg", concat) 
-        #^^^^^^^^^^^^# TAKE PICTURES #^^^^^^^^^^^^#
+    concat = cv2.vconcat([frameb, framew]) 
+    concat = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
+    cv2.imwrite("ADTT/live_recongize/Images/Image.jpg", concat) 
+    #cv2.imshow("Image",concat) 
 
-        #vvvvvvvvvvvv# RECONGIZING USING ML #vvvvvvvvvvvvv#
+    #^^^^^^^^^^^^# TAKE PICTURES #^^^^^^^^^^^^#
+
+    #vvvvvvvvvvvv# RECONGIZING USING ML #vvvvvvvvvvvvv#
     dataset_test = PredDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
     data_loader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=collate_fn)
     iterator = iter(data_loader_test)
@@ -117,9 +120,10 @@ while (True):
     image_w = (images[0].permute(1, 2, 0).detach().cpu().numpy() * 255).astype(np.uint8)
 
     scores_w = output[0]['scores'].detach().cpu().numpy()
-    high_scores_idxs_w = np.where(scores_w > 0.9)[0].tolist()  # Indexes of boxes with scores > 0.9
+    high_scores_idxs_w = np.where(scores_w > 0.85)[0].tolist()  # Indexes of bird boxes with scores > 0.85
+
     post_nms_idxs_w = torchvision.ops.nms(output[0]['boxes'][high_scores_idxs_w], output[0]['scores'][high_scores_idxs_w],
-                                        0.3).cpu().numpy()  # Indexes of boxes left after applying NMS (iou_threshold=0.3)]
+                                        0.3).cpu().numpy()  # Indexes of bird boxes left after applying NMS (iou_threshold=0.3)]
 
     keypoints_w = []
     for kps in output[0]['keypoints'][high_scores_idxs_w][post_nms_idxs_w].detach().cpu().numpy():
@@ -128,19 +132,43 @@ while (True):
     for bbox in output[0]['boxes'][high_scores_idxs_w][post_nms_idxs_w].detach().cpu().numpy():
         bboxes_w.append(list(map(int, bbox.tolist())))
 
+    #^^^^^^^^^^^^# RECONGIZING USING ML #^^^^^^^^^^^^#
+        
+    bird_found= False
+    if not(keypoints_w == []) :
+        #Birds are detected
+        if (len(keypoints_w) == 2) :
+            #Two birds detected"
+
+            #if (keypoints_w[0][0][0])
+
+
+            print(keypoints_w[0][0][0])
+            save_image(KEYPOINTS_FOLDER_TEST,counter,image_w, bboxes_w, keypoints_w )
+            counter= counter +1
+
+        #wall_birds = 
+
+        #beam_birds = 
         
 
-    if not(keypoints_w == []):
-        print( "Birds detected in image at")
-        print(keypoints_w)
-        save_image(KEYPOINTS_FOLDER_TEST,counter,image_w, bboxes_w, keypoints_w )
-        counter= counter +1
-        #^^^^^^^^^^^^# RECONGIZING USING ML #^^^^^^^^^^^^#
+        #TODO
+        #wall_left_birds  =
+        #wall_right_birds =
+        #beam_left_birds  =
+        #beam_right_birds =    
+        #It is done like this only because of the arrangement of the cameras, NOT POSSIBLE for all arrangements of cameras
+        #since the cameras are facing each otehr , if a bird is on the LEFT side of the image in the beam camera, it MUST be on the right side in the WALL camera , and vice versa
+        else:
+            print("Only 1 or more than 2 birds detected")
+    else:
+        print("No birds  ")
 
-        #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
-    ##keypoints_w = [[157 , 776] , [538 , 465]]
-    #if not(keypoints_w == []) and (len(keypoints_w) ==2):
-    if (not True):  
+
+    #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
+    
+    #Below section underconstruction
+    if not( True ):  
        
         W_object = keypoints_w[0]
         B_object = keypoints_w[1]
@@ -174,5 +202,5 @@ while (True):
         #^^^^^^^^^^^^# USE LASER #^^^^^^^^^^^^#
 
         #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
-
+    
 #-----------------------------#MAIN  LOOP#----------------------------------------------------------------------------------------------#

@@ -27,7 +27,7 @@ def check_for_decrease( variable_line , input, constant_line_point, delta, curre
 
 
 ###############################################################
-def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =49, beam_cam_posn=[0,0,0], wall_cam_posn = [0,0,0], W_ob_px=[0,0], B_ob_px=[0,0]):
+def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =49, beam_cam_posn=[0,0,0,0,0,0], wall_cam_posn = [0,0,0,0,0,0], W_ob_px=[0,0], B_ob_px=[0,0]):
 
 
     ## Converting all these to radians
@@ -36,7 +36,6 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     v_focal_length_px = (image_height/2)/(math.tan(v_angle_of_view_c/2))
     ##Vertical and horizontal focal length in pixels should be the same
 
-    down_angle_c = -55 *(math.pi /180)
 
     wall_x_p = W_ob_px[0]
     wall_y_p = W_ob_px[1]
@@ -62,6 +61,8 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     i_wall = 1
     j_wall = wall_xfc_x/v_focal_length_px
     k_wall = wall_xfc_y/v_focal_length_px
+    print(j_wall)
+    print(k_wall)
     
     ##Augment to fit onto facing xyz plane, ebcause when the vector is generated fro mteh image, there is an error in transforming the x plane to the y plane 
     j_wall = -j_wall
@@ -72,6 +73,7 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     wall_point_posn_vec_i = (i_wall * math.cos(wall_cam_posn[4]*(math.pi /180))) - (k_wall * math.sin(wall_cam_posn[4]*(math.pi /180)))
     wall_point_posn_vec_j = j_wall
     wall_point_posn_vec_k = (i_wall * math.sin(wall_cam_posn[4]*(math.pi /180))) + (k_wall * math.cos(wall_cam_posn[4]*(math.pi /180))) 
+
 
     #AND THEN Adjust for rotation about z  axis
     wall_point_posn_vec_i = (wall_point_posn_vec_i * math.cos(wall_cam_posn[5]*(math.pi /180))) - (wall_point_posn_vec_j * math.sin(wall_cam_posn[5]*(math.pi /180)))
@@ -98,7 +100,7 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
     #If the camera was at 0,0,0 with angle 0,0,0 . this vector would represent the direction of the bird from the camera
 
-    ##Augment to fit onto facing xyz plane, ebcause when the vector is generated fro mteh image, there is an error in transforming the x plane to the y plane 
+    ##Augment to fit onto facing xyz plane, ebcause when the vector is generated from teh image, there is an error in transforming the x plane to the y plane 
     j_beam = -j_beam
 
     #Adjust for rotation about y  axis
@@ -183,22 +185,21 @@ v_angle_of_view = 49
 image_width_px = 720 
 image_height_px = 1280 
 
-beam_cam_posn= [-2.2 ,0 ,3.0, 0, -55.0 , 0 ]
-# wall cam is facing forward , toward positive x values 
+beam_cam_posn= [4.4 ,0 ,3 , 0, -55.0 , 180 ]
+#beam cam is facing backwards towrds negative x values
+
 # rotation angles are (rotation about the x axis, rotation about the y axis, and rotation about the z axis
 #rotation about the x axis is roll (which is not expected to be used)
 # roation about y axis is tilt (down angle)
 #rotation about z axis is pan (rotation on the xy plane)
 
-wall_cam_posn = [ 2.2, 0, 3.0 , 0 ,-55.0, 180]
-#beam cam is facing backwards , towards negative x values 
+wall_cam_posn = [0, 0, 3  , 0 ,-55.0, 0]
+# wall cam is facing forward , toward positive x values 
 
 
-# TODO - update this to include euler angles of camera . 
 
-
-W_object = [136, 667] 
-B_object = [553, 378]
+#W_object = [360,930] 
+#B_object = [360,724]
 
 
 

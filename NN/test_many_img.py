@@ -31,10 +31,10 @@ tail_error_y = 0
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_model(num_keypoints = 2, weights_path = 'pth_files/low_res_birds_500.pth')
+model = get_model(num_keypoints = 2, weights_path = 'ADTT/NN/keypointsrcnn_weights_75.pth')
 model.to(device)
 
-KEYPOINTS_FOLDER_TEST = 'making_a_dataset/evaluation'
+KEYPOINTS_FOLDER_TEST = 'ADTT/NN/EVALUATE'
 dataset_test = ClassDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
 data_loader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
@@ -74,10 +74,10 @@ for idx in range(len(next(os.walk( KEYPOINTS_FOLDER_TEST +"/Images" ))[2])):
         bboxes.append(list(map(int, bbox.tolist())))
 
     ################################################################################################################
-    save_image('making_a_dataset/evaluation/Check', idx  , image, bboxes, keypoints)
+    #save_image('making_a_dataset/evaluation/Check', idx  , image, bboxes, keypoints)
     #visualize(idx  , image, bboxes, keypoints)
-    f = open('making_a_dataset/evaluation/Annotations/Image'+str(counter)+'.json')
-    data = json.load(f)
+    #f = open('ADTT/NN/EVALUATE/Annotations/Image'+str(counter)+'.json')
+    #data = json.load(f)
 
     if not (keypoints == []):
         beak_error_x =beak_error_x + abs((keypoints_g_truth[0][0][0])-(keypoints[0][0][0]))

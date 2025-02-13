@@ -10,23 +10,23 @@ from save_image import save_image
 ############# NN SETUP##############
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = get_model(num_keypoints = 2, weights_path = 'NN/pth_files/low_res_birds_500.pth')
+model = get_model(num_keypoints = 2, weights_path = 'ADTT/NN/keypointsrcnn_weights_35.pth')
 model.to(device)
 
-KEYPOINTS_FOLDER_TEST = 'NN/live_recongize'
-############# NN SETUP##############
+KEYPOINTS_FOLDER_TEST = 'ADTT/NN/live_recongize'
+############# NN SETUP##############pi
 
 
 ############# CAMERA SETUP##############\
 
-count = 0 
-capw = cv2.VideoCapture( 0 ) 
+
+capw = cv2.VideoCapture( 0  +cv2.CAP_DSHOW ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capw.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capw.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
 
-capb = cv2.VideoCapture( 2 )  
+capb = cv2.VideoCapture( 1  +cv2.CAP_DSHOW )  
 capb.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capb.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capb.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -47,28 +47,19 @@ if not capb.isOpened():
 
 #ret, framew = capw.read()
 #ret, frameb = capb.read()
-
+count= 1
 while True:
 
     ret, framew = capw.read()
     ret, frameb = capb.read()
 
-    while (not ret):
-        ret, framew = capw.read()
-        ret, frameb = capb.read()
-        count = count +1
-        print(count)
-
-
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
     
-    
-
-    concat = cv2.vconcat([framew, frameb]) 
+    concat = cv2.vconcat([frameb, framew]) 
     concat = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
-    cv2.imwrite("NN/live_recongize/Images/live.jpg", concat) 
+    cv2.imwrite("ADTT/NN/live_recongize/Images/live.jpg", concat) 
 
     #################### RECONGIZING USING ML##########################
     dataset_test = PredDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
@@ -81,6 +72,7 @@ while True:
         model.to(device)
         model.eval()
         output = model(images)
+
     #TODO , make lines above run faster somehow
         #t1 = time.time()   - 3.2 seconds
 
@@ -112,10 +104,23 @@ while True:
     #Note that the function below is for when ONE iMage is in thE prediction foilder
     # and the param 'count' is used to label files , nothing more
 
-    save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
+    #################### RECONGIZING USING ML##########################
+
+    #save_image(KEYPOINTS_FOLDER_TEST,1,image_w, bboxes_w, keypoints_w )
     #print(keypoints_w)
-    show_live = cv2.imread('NN/live_recongize/Images/live.jpg',1)
+
+    if (keypoints_w):
+        print("Bird found")
+        print(keypoints_w)
+        save_image(KEYPOINTS_FOLDER_TEST,count,image_w, bboxes_w, keypoints_w )
+        count = count +1
+    else:
+        print("No bird")
+
+    show_live = cv2.imread('ADTT/NN/live_recongize/Images/live.jpg',1)
+
     cv2.imshow("image",show_live)
+
     if cv2.waitKey(1) == ord('0'):
         break
 # When everything done, release the capture

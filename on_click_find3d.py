@@ -1,6 +1,7 @@
 
 import cv2
 from intersection import find_intersection
+import time
 
 
 take = []
@@ -15,16 +16,18 @@ def mouse_point(event,x,y,flags,params):
 ###################
         
 ############# CAMERA SETUP##############
-capw = cv2.VideoCapture( 2 ) 
+capw = cv2.VideoCapture(  0  +cv2.CAP_DSHOW ) 
 capw.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capw.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capw.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
-capb = cv2.VideoCapture( 0 )  
+capb = cv2.VideoCapture(  1  +cv2.CAP_DSHOW )  
 capb.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 capb.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 capb.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-
+ret, framew = capw.read()
+ret, frameb = capb.read()
+time.sleep(2)
 if not capw.isOpened():
 
     print("Cannot open camera double U")
@@ -49,22 +52,26 @@ while True:
         print("Can't receive frame (stream end?). Exiting ...")
         break
     
-    concat = cv2.vconcat([framew, frameb])
-    
-    r_image = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
-    
+                       
+    concat = cv2.vconcat([frameb, framew])
+    #beam underneath , wall on top
 
-    cv2.imshow("Wall Image", r_image)
-    cv2.setMouseCallback("Wall Image",mouse_point)
+    concat = cv2.rotate(concat, cv2.ROTATE_90_CLOCKWISE)
+    #beam right , wall left
+
+    cv2.imshow("Image", concat)
+    cv2.setMouseCallback("Image",mouse_point)
     
     ##HOWTO - Click on the object in the wall image, then in the beam image, then press zero 
 
+
+
     if cv2.waitKey(1) == ord('0'):
         
-        new_take = take[0][0]-720
 
-        W_object =[ new_take,take[0][1] ]
-        B_object = take[1]
+        W_object= take[0]
+        B_object= take[1]
+        B_object = ( B_object[0] - 720, B_object[1])
         
         break
 
@@ -81,10 +88,10 @@ down_angle = -55.0
 image_width_px = 720 
 image_height_px = 1280 
 
-beam_cam = [-2.2 ,0 ,3.0]
+beam_cam = [ 4.4 ,0 ,3.0, 0, -55.0 , 180 ]
 # wall cam is facing forward , toward positive x values 
-wall_cam = [ 2.2, 0, 3.0]
+wall_cam = [ 0, 0, 3.0 , 0 ,-55.0, 0 ]
 #beam cam is facing backwards , towards negative x values 
 print(W_object)
 print(B_object)
-print(find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) ) 
+print(find_intersection(image_height_px, image_width_px, v_angle_of_view, beam_cam, wall_cam , W_object , B_object) ) 
