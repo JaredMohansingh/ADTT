@@ -29,13 +29,11 @@ def check_for_decrease( variable_line , input, constant_line_point, delta, curre
 ###############################################################
 def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =49, beam_cam_posn=[0,0,0,0,0,0], wall_cam_posn = [0,0,0,0,0,0], W_ob_px=[0,0], B_ob_px=[0,0]):
 
-
     ## Converting all these to radians
     v_angle_of_view_c = (math.pi /180)*v_angle_of_view_d
 
     v_focal_length_px = (image_height/2)/(math.tan(v_angle_of_view_c/2))
     ##Vertical and horizontal focal length in pixels should be the same
-
 
     wall_x_p = W_ob_px[0]
     wall_y_p = W_ob_px[1]
@@ -61,25 +59,25 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     i_wall = 1
     j_wall = wall_xfc_x/v_focal_length_px
     k_wall = wall_xfc_y/v_focal_length_px
-    print(j_wall)
-    print(k_wall)
     
-    ##Augment to fit onto facing xyz plane, ebcause when the vector is generated fro mteh image, there is an error in transforming the x plane to the y plane 
-    j_wall = -j_wall
 
     #If the camera was at 0,0,0 with angle 0,0,0 . this vector would represent the direction of the bird from the camera
     
-    #Adjust for rotation about y  axis
+    #Adjust for rotation about the y axis (roll)
+    #System designed for no rotation about the x axis (no gimbal lock possible)
+
+    #Adjust for rotation about x axis (tilt)
     wall_point_posn_vec_i = (i_wall * math.cos(wall_cam_posn[4]*(math.pi /180))) - (k_wall * math.sin(wall_cam_posn[4]*(math.pi /180)))
     wall_point_posn_vec_j = j_wall
+    #j vector is unaffected by tilt
     wall_point_posn_vec_k = (i_wall * math.sin(wall_cam_posn[4]*(math.pi /180))) + (k_wall * math.cos(wall_cam_posn[4]*(math.pi /180))) 
+    
 
-
-    #AND THEN Adjust for rotation about z  axis
+    #AND THEN Adjust for rotation about z axis (pan)
     wall_point_posn_vec_i = (wall_point_posn_vec_i * math.cos(wall_cam_posn[5]*(math.pi /180))) - (wall_point_posn_vec_j * math.sin(wall_cam_posn[5]*(math.pi /180)))
     wall_point_posn_vec_j = (wall_point_posn_vec_i * math.sin(wall_cam_posn[5]*(math.pi /180))) + (wall_point_posn_vec_j * math.cos(wall_cam_posn[5]*(math.pi /180)))
     wall_point_posn_vec_k = wall_point_posn_vec_k
-
+    
 
     ################################################################################################################################################################################
     #generate camera point vector from beam
@@ -97,30 +95,28 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
     i_beam = 1 
     j_beam = beam_xfc_x/v_focal_length_px
     k_beam = beam_xfc_y/v_focal_length_px
-
     #If the camera was at 0,0,0 with angle 0,0,0 . this vector would represent the direction of the bird from the camera
 
-    ##Augment to fit onto facing xyz plane, ebcause when the vector is generated from teh image, there is an error in transforming the x plane to the y plane 
-    j_beam = -j_beam
 
     #Adjust for rotation about y  axis
     beam_point_posn_vec_i = (i_beam * math.cos(beam_cam_posn[4]*(math.pi /180))) - (k_beam * math.sin(beam_cam_posn[4]*(math.pi /180)))
     beam_point_posn_vec_j = j_beam
     beam_point_posn_vec_k = (i_beam * math.sin(beam_cam_posn[4]*(math.pi /180))) + (k_beam * math.cos(beam_cam_posn[4]*(math.pi /180))) 
+    
 
     #AND THEN Adjust for rotation about z  axis
     beam_point_posn_vec_i = (beam_point_posn_vec_i * math.cos(beam_cam_posn[5]*(math.pi /180))) - (beam_point_posn_vec_j * math.sin(beam_cam_posn[5]*(math.pi /180)))
     beam_point_posn_vec_j = (beam_point_posn_vec_i * math.sin(beam_cam_posn[5]*(math.pi /180))) + (beam_point_posn_vec_j * math.cos(beam_cam_posn[5]*(math.pi /180)))
     beam_point_posn_vec_k = beam_point_posn_vec_k
-
     
     ################################################################################################################################################################################
 
     #Beam
-    line_1 = [[beam_cam_posn[0] , beam_cam_posn[1] , beam_cam_posn[2]],[ beam_point_posn_vec_i  , beam_point_posn_vec_j, beam_point_posn_vec_k]]
+    line_1 = [[beam_cam_posn[0] , beam_cam_posn[1] , beam_cam_posn[2]],[ beam_point_posn_vec_j  , beam_point_posn_vec_i, beam_point_posn_vec_k]]
     # Wall
-    line_2 = [[ wall_cam_posn[0] , wall_cam_posn[1] , wall_cam_posn[2]],[ wall_point_posn_vec_i  , wall_point_posn_vec_j, wall_point_posn_vec_k]]
+    line_2 = [[ wall_cam_posn[0] , wall_cam_posn[1] , wall_cam_posn[2]],[ wall_point_posn_vec_j  , wall_point_posn_vec_i, wall_point_posn_vec_k]]
 
+    #Lines aboce changed so that the ijk gradient is now switched to suit the paramenter supplied to the function (xyz)
 
     line_1_input = 0
     line_2_input = 0
@@ -162,7 +158,6 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
             if (distance_tracker[1] == inter_line_distance):
                 turn_on = False
 
-
     avg_point = [1,1,1]
     avg_point[0] = ((current_line_1[0])+(current_line_2[0]))/2
     avg_point[1] = ((current_line_1[1])+(current_line_2[1]))/2
@@ -177,29 +172,30 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
 ###############################################################
 
-d__angle_of_view = 55.0 
-h_angle_of_view = 25.73 
-v_angle_of_view = 49 
+#TESTING VVVVV
+
+#d__angle_of_view = 55.0 
+#h_angle_of_view = 25.73 
+#v_angle_of_view = 49 
 
 
-image_width_px = 720 
-image_height_px = 1280 
+#image_width_px = 720 
+#image_height_px = 1280 
 
-beam_cam_posn= [4.4 ,0 ,3 , 0, -55.0 , 180 ]
+#beam_cam_posn= [ 0, 4.4 ,3 , 0, -55.0 , 180 ]
 #beam cam is facing backwards towrds negative x values
 
 # rotation angles are (rotation about the x axis, rotation about the y axis, and rotation about the z axis
 #rotation about the x axis is roll (which is not expected to be used)
 # roation about y axis is tilt (down angle)
 #rotation about z axis is pan (rotation on the xy plane)
-
-wall_cam_posn = [0, 0, 3  , 0 ,-55.0, 0]
+#wall_cam_posn = [0, 0, 3  , 0 ,-55.0, 0]
 # wall cam is facing forward , toward positive x values 
 
 
 
-#W_object = [360,930] 
-#B_object = [360,724]
+#W_object = [145,555] 
+#B_object = [583,670]
 
 
 

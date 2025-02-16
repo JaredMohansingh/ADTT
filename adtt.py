@@ -42,20 +42,24 @@ while not(True):
 
 #vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#   
 
-laser_posn = [0,0,3]
+laser_posn = [ -1.9, 0.05 ,2.3]
+#change this to laser_posn = [ -1.9, 0.05 ,2.3]
 
 d__angle_of_view = 55.0 
 h_angle_of_view = 25.73 
 v_angle_of_view = 49 
-down_angle = -55.0 
+#down_angle = -55.0 
 
 image_width_px = 720 
 image_height_px = 1280 
 
-beam_cam = [ 4.4 ,0 ,3.0, 0, -55.0 , 180 ]
+beam_cam = [ 0, 4.4 ,3 , 0, -55.0 , 180 ]
 # wall cam is facing forward , toward positive x values 
-wall_cam = [ 0, 0, 3.0 , 0 ,-55.0, 0 ]
+
+wall_cam = [ 0, 0  ,3 , 0, -55.0 , 0 ]
 #beam cam is facing backwards , towards negative x values 
+
+
 
 #default value
 #^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
@@ -87,6 +91,7 @@ if not capb.isOpened():
 #-----------------------------#MAIN  LOOP#----------------------------------------------------------------------------------------------#
 
 counter = 0
+#This just indexes the positive IDs in images on birds to be tracked
 while (True):
 
     #vvvvvvvvvvvv# TAKE PICTURES #vvvvvvvvvvvvv#
@@ -135,24 +140,38 @@ while (True):
     #^^^^^^^^^^^^# RECONGIZING USING ML #^^^^^^^^^^^^#
         
     bird_found= False
+    w_Object = []
+    b_Object = []
     if not(keypoints_w == []) :
         #Birds are detected
         if (len(keypoints_w) == 2) :
-            #Two birds detected"
+            #Two birds detected
+            #Most major fault of the system is that it works IF and ONLY IF there is one bird in the area, detected by both cameras
 
-            #if (keypoints_w[0][0][0])
+            if ((keypoints_w[0][0][0]) > 720 ):
+                b_Object = keypoints_w[0][0]
+                
 
+            else:
+                w_Object = keypoints_w[1][0]
 
-            print(keypoints_w[0][0][0])
+            if ((keypoints_w[1][0][0]) > 720 ):
+                b_Object = keypoints_w[0][0]
+            
+            else:
+                w_Object = keypoints_w[1][0]
+            
+
+            b_Object[0] = b_Object[0]-720
+            #Need to correct for the image being on the right
+            #There should be a better way to do this
+
+            bird_found = True
             save_image(KEYPOINTS_FOLDER_TEST,counter,image_w, bboxes_w, keypoints_w )
             counter= counter +1
-
-        #wall_birds = 
-
-        #beam_birds = 
-        
-
-        #TODO
+            print(b_Object)
+            print(w_Object)
+        #TODO if the system was to be capable of supporting tracknig multiple birds
         #wall_left_birds  =
         #wall_right_birds =
         #beam_left_birds  =
@@ -168,39 +187,33 @@ while (True):
     #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
     
     #Below section underconstruction
-    if not( True ):  
+    if ( bird_found ):  
        
-        W_object = keypoints_w[0]
-        B_object = keypoints_w[1]
-        #B_object = [157 , 776]
-        #W_object = [538 , 465]
-
-
         #vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#
-
-        bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view, down_angle,beam_cam, wall_cam , W_object , B_object) 
+        
+        bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view,beam_cam, wall_cam , w_Object , b_Object) 
         print("Bird detected in 3d space at location")
         print(bird_coord)
         #^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
 
-        
-        #vvvvvvvvvvvv# CALCULATE LASER ANGLES #vvvvvvvvvvvvv#
-        az, theta = find_az_and_theta(laser_posn , bird_coord)
-        print("Turning laser to angles")
-        print(az)
-        print(theta)
-        #^^^^^^^^^^^^# CALCULATE LASER ANGLES #^^^^^^^^^^^^#
+        if (True):
+            #vvvvvvvvvvvv# CALCULATE LASER ANGLES #vvvvvvvvvvvvv#
+            az, theta = find_az_and_theta(laser_posn , bird_coord)
+            print("Turning laser to angles")
+            print(az)
+            print(theta)
+            #^^^^^^^^^^^^# CALCULATE LASER ANGLES #^^^^^^^^^^^^#
 
-        #vvvvvvvvvvvv# USE LASER #vvvvvvvvvvvvv#
-        command = "a"+str(az)
-        arduino_a.write(  command.encode()) 
-        arduino_t.write(  command.encode())
+            #vvvvvvvvvvvv# USE LASER #vvvvvvvvvvvvv#
+            #command = "a"+str(az)
+            #arduino_a.write(  command.encode()) 
+            #arduino_t.write(  command.encode())
 
-        command = "t"+str(theta)
-        arduino_a.write(  command.encode()) 
-        arduino_t.write(  command.encode()) 
-        #^^^^^^^^^^^^# USE LASER #^^^^^^^^^^^^#
+            #command = "t"+str(theta)
+            #arduino_a.write(  command.encode()) 
+            #arduino_t.write(  command.encode()) 
+            #^^^^^^^^^^^^# USE LASER #^^^^^^^^^^^^#
 
         #-----------------------------# WHEN BIRDS ARE DETECTED #------------------------------------------------------#
-    
+    time.sleep(100)
 #-----------------------------#MAIN  LOOP#----------------------------------------------------------------------------------------------#
