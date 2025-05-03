@@ -88,10 +88,11 @@ down_angle = -55.0
 image_width_px = 720 
 image_height_px = 1280 
 
-beam_cam = [ 4.4 ,0 ,3.0, 0, -55.0 , 180 ]
+beam_cam = [ 0,4.4  ,3.0, 0, -55.0 , 180 ]
 # wall cam is facing forward , toward positive x values 
 wall_cam = [ 0, 0, 3.0 , 0 ,-55.0, 0 ]
 #beam cam is facing backwards , towards negative x values 
 print(W_object)
 print(B_object)
+
 print(find_intersection(image_height_px, image_width_px, v_angle_of_view, beam_cam, wall_cam , W_object , B_object) ) 

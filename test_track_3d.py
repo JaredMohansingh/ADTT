@@ -18,7 +18,7 @@ while(True):
     break
   arduino_a.write(jnt.encode()) 
   arduino_t.write(jnt.encode()) 
-    ################################# ###############
+    ################################################
 
 
 while (True):
@@ -34,7 +34,6 @@ while (True):
   az,theta = find_az_and_theta(laser_posn, target_posn)
   #print(az)
   #print(theta)
-
 
   command = "t" + str(theta) + "\r"
   print(command)

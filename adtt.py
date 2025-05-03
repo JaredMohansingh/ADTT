@@ -42,8 +42,8 @@ while not(True):
 
 #vvvvvvvvvvvv# INTERSECTION #vvvvvvvvvvvvv#   
 
-laser_posn = [ -1.9, 0.05 ,2.3]
-#change this to laser_posn = [ -1.9, 0.05 ,2.3]
+
+
 
 d__angle_of_view = 55.0 
 h_angle_of_view = 25.73 
@@ -59,6 +59,8 @@ beam_cam = [ 0, 4.4 ,3 , 0, -55.0 , 180 ]
 wall_cam = [ 0, 0  ,3 , 0, -55.0 , 0 ]
 #beam cam is facing backwards , towards negative x values 
 
+laser_posn = [ -1.9, 0.05 ,2.3]
+# laser is under the wall camera and to the left a bit
 
 
 #default value
@@ -194,6 +196,7 @@ while (True):
         bird_coord = find_intersection(image_height_px, image_width_px, v_angle_of_view,beam_cam, wall_cam , w_Object , b_Object) 
         print("Bird detected in 3d space at location")
         print(bird_coord)
+        #laser is calibrated to rotate counter clockwise and down increasing from (0,0), where 0,0 is having the beam of the laser parallel to the x axis
         #^^^^^^^^^^^^# INTERSECTION #^^^^^^^^^^^^#
 
         if (True):

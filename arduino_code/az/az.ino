@@ -5,6 +5,7 @@
 
 #define LASER_PIN 1
 #define TRIGGER_PIN 6
+#define SERVO_PIN 0
 //Source for control system code : https://www.youtube.com/watch?v=RZW1PsfgVEI&t=317s
 //Code for as5600 library : https://github.com/RobTillaart/AS5600
 
@@ -23,7 +24,7 @@ double kp , ki , kd ;
 //Variables for pid control system
 
 double set_point = 0 ;
-//Variabel that controls setpoint
+//Variable that controls setpoint
 
 int servo_input = 0;
 //The output variable from the controller that is used to adjust the system and satisfy the reading from the sensor
@@ -40,7 +41,7 @@ int servo_zp = 90;
 
 int servo_cw_dp =  87;
 int servo_ccw_dp = 98 ;
-// The value at which the servo doesnt move, so 87 and 98 , the servo moves
+// The value at which the servo doesnt move, so 87 and 98 , the servo moves (christmas tree)
 //
 // 0                             87,88       90            97,98                         180
 // I----------------CW-------------I----DZ---I------DZ-------I------------CCW-------------I
@@ -50,8 +51,6 @@ int az = 0;
 int theta = 0 ;
 
 int trigger_state ;
-
-
 
 void setup()
 {
@@ -63,13 +62,12 @@ void setup()
 
   pinMode(LASER_PIN, OUTPUT);
 
-
   kp = 0.8;
   ki = 0.05;
   kd = 0.05;
   //Control system parameters initilazied
 
-  twpro.attach(0);  // attaches the servo on pin 9 to the servo object
+  twpro.attach(SERVO_PIN);  // attaches the servo on pin 0 to the servo object
   Serial.begin(9600);
   //Serial.println(__FILE__);
   //Serial.print("AS5600_LIB_VERSION: ");
@@ -171,11 +169,13 @@ void loop()
     {
       turn_off();
     }
+    //Laser commands
 
     if ((az and data.startsWith("a") )  or  (theta and data.startsWith("t")))
     {
       
       data.remove(0,1);
+      //This takes off either the a or the t at the start of the command
       //Serial.println(data);
       
       if ( data.startsWith("u") )
@@ -186,32 +186,28 @@ void loop()
       {
         set_point = set_point - 45;
       }
-      if ( data.startsWith("r") )
+      if ( data.startsWith("r") ) //"This position is now zero degrees "
       {
         Serial.println("This position is now ZERO degrees");
         //as5600.resetCumulativePosition(0); <-For some reason this function doesnt actually reset to zero, but instead to -18.4.
         bias = sensor_value   ;
         set_point = 0 ;
       }
-
-
-      if (data.startsWith("z"))
+      if (data.startsWith("z"))  //To set it to the zero position
       {
-        set_point = 0;
+        set_point = 0; //This is needed since  the "if" statements below prevents zero from being the setpoint
       }
-      //This is needed since  teh if statements belkow prevents zero from being the setpoint
-
-      if (data.toFloat() != 0)
+      if (data.toFloat() != 0) //To set it to the desired angle 
       {
         set_point = data.toFloat() ;
       }
-
-      if(data.startsWith("n"))
+      //It is done like this because  IF there is an error in the sensor, it gives the reading as zero
+      //So the setpoint does not accept zero as a value , but isntead needs the z 
+      if(data.startsWith("n"))  //Used when calibrating, this used to set custom angles to be otehr angles , "This "
       {
         data.remove(0,1);
-        if (data.toFloat() != 0)
+        if (data.toFloat() != 0) //takes out the N character
         {
-          
           bias = bias + ( set_point - data.toFloat()) ;
 
           set_point = data.toFloat() ;
@@ -228,7 +224,7 @@ double rectify_for_servo(double controller_output)
   //Actually scaling the value from <-360 to 360> to <0 to 180>
   //See christmas tree diagram
 
-  if ( abs(controller_output- servo_zp ) < 0.3  )
+  if ( abs(controller_output- servo_zp ) < 0.05  )
   {
     return 90 ;
   }

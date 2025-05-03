@@ -174,13 +174,13 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
 #TESTING VVVVV
 
-#d__angle_of_view = 55.0 
-#h_angle_of_view = 25.73 
-#v_angle_of_view = 49 
+d__angle_of_view = 55.0 
+h_angle_of_view = 25.73 
+v_angle_of_view = 49 
 
 
-#image_width_px = 720 
-#image_height_px = 1280 
+image_width_px = 720 
+image_height_px = 1280 
 
 #beam_cam_posn= [ 0, 4.4 ,3 , 0, -55.0 , 180 ]
 #beam cam is facing backwards towrds negative x values
@@ -196,6 +196,8 @@ def find_intersection(image_height =1280, image_width=720 , v_angle_of_view_d =4
 
 #W_object = [145,555] 
 #B_object = [583,670]
+#W_object = [363,698] 
+#B_object = [362,526]
 
 
 
